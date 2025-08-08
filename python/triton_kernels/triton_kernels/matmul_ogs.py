@@ -431,8 +431,6 @@ def matmul_ogs(x, w, bias,
     batch_size = w.shape[0] if routing_data.expt_hist is None and w.ndim == 3 else 1
     K, N = w.shape[-2:]
     W_TRANSPOSE = w.storage.data.stride()[-2] != 1
-    if W_TRANSPOSE:
-        K, N = N, K
     assert K == x.shape[-1]
     if x.ndim == 3 and w.ndim == 3:
         assert x.shape[0] == w.shape[0]
