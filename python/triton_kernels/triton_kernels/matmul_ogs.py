@@ -304,9 +304,6 @@ def init_allocation(x, w, precision_config, fused_activation, routing_data, gath
                     preprocessing_features, postprocessing_features):
     # ---- output ------
     N = w.shape[-1]
-    W_TRANSPOSE = w.storage.data.stride()[-2] != 1
-    if W_TRANSPOSE:
-        N = w.shape[-2]
     # by default - M is number of rows in the activations
     M = x.shape[-2]
     # if the activations are gathered, then M is number of gather indices
