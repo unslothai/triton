@@ -242,7 +242,10 @@ def _matmul_ogs(
 
     offs_w_k = PACKED_BLOCK_K_W * pid_k + tl.arange(0, PACKED_BLOCK_K_W)
     W += expt_id * stride_w_e
-    WPtrs = W + (offs_w_k.to(index_type)[:, None] * stride_w_k + offs_w_n.to(index_type)[None, :] * stride_w_n)
+    if not W_TRANSPOSE:
+        WPtrs = W + (offs_w_k.to(index_type)[:, None] * stride_w_k + offs_w_n.to(index_type)[None, :] * stride_w_n)
+    else:
+        WPtrs = W + (offs_w_n.to(index_type)[:, None] * stride_w_k + offs_w_k.to(index_type)[None, :] * stride_w_n)
     # compute output
     acc = tl.zeros((BLOCK_M, BLOCK_N), dtype=tl.float32)
     for k in range(K, BLOCK_K * pid_k, -(BLOCK_K * SPLIT_K)):

@@ -304,6 +304,9 @@ def init_allocation(x, w, precision_config, fused_activation, routing_data, gath
                     preprocessing_features, postprocessing_features):
     # ---- output ------
     N = w.shape[-1]
+    W_TRANSPOSE = w.storage.data.stride()[-2] != 1
+    if W_TRANSPOSE:
+        N = w.shape[-2]
     # by default - M is number of rows in the activations
     M = x.shape[-2]
     # if the activations are gathered, then M is number of gather indices
@@ -430,6 +433,9 @@ def matmul_ogs(x, w, bias,
     M = x.shape[-2] if gather_indx is None else gather_indx.src_indx.shape[0]
     batch_size = w.shape[0] if routing_data.expt_hist is None and w.ndim == 3 else 1
     K, N = w.shape[-2:]
+    W_TRANSPOSE = w.storage.data.stride()[-2] != 1
+    if W_TRANSPOSE:
+        K, N = N, K
     assert K == x.shape[-1]
     if x.ndim == 3 and w.ndim == 3:
         assert x.shape[0] == w.shape[0]
@@ -538,7 +544,8 @@ def matmul_ogs(x, w, bias,
                    x_tensor_or_tma, x_storage.data, *x_strides,
                    flex.lhs_data.scale,
                    None if x_scale is None else x_scale.data.view(torch.uint8), *x_scale_strides,
-                   w_tensor_or_tma, *w_storage.data.stride(), w_storage.data.stride()[-2] != 1,
+                   w_tensor_or_tma, *w_storage.data.stride(),
+                   W_TRANSPOSE,
                    flex.rhs_data.scale,
                    w_scale_tensor_or_tma, *w_scale_strides,
                    bias, bias_stride,
