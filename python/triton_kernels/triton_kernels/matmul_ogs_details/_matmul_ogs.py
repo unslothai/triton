@@ -77,7 +77,7 @@ def _matmul_ogs(
              DISABLE_Y_TMA: tl.constexpr = True,
              SWAP_XW: tl.constexpr = False,
              IS_EPILOGUE_DEQUANT_MXFP8: tl.constexpr = False):
-
+    tl.static_print(f"W_TRANSPOSE={W_TRANSPOSE}")
     Y = Out  # Y is passed for the purposes of annotation; replace it with Out
     is_w_microscaled: tl.constexpr = WMxScale is not None
     MX_PACK_DIVISOR: tl.constexpr = MXFP_BLOCK_SIZE
