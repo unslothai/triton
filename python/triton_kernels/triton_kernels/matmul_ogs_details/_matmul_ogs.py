@@ -77,7 +77,7 @@ def _matmul_ogs(
              DISABLE_Y_TMA: tl.constexpr = True,
              SWAP_XW: tl.constexpr = False,
              IS_EPILOGUE_DEQUANT_MXFP8: tl.constexpr = False):
-    tl.static_print(f"W_TRANSPOSE={W_TRANSPOSE}")
+
     Y = Out  # Y is passed for the purposes of annotation; replace it with Out
     is_w_microscaled: tl.constexpr = WMxScale is not None
     MX_PACK_DIVISOR: tl.constexpr = MXFP_BLOCK_SIZE
@@ -242,10 +242,7 @@ def _matmul_ogs(
 
     offs_w_k = PACKED_BLOCK_K_W * pid_k + tl.arange(0, PACKED_BLOCK_K_W)
     W += expt_id * stride_w_e
-    if not W_TRANSPOSE:
-        WPtrs = W + (offs_w_k.to(index_type)[:, None] * stride_w_k + offs_w_n.to(index_type)[None, :] * stride_w_n)
-    else:
-        WPtrs = W + (offs_w_n.to(index_type)[:, None] * stride_w_k + offs_w_k.to(index_type)[None, :] * stride_w_n)
+    WPtrs = W + (offs_w_k.to(index_type)[:, None] * stride_w_k + offs_w_n.to(index_type)[None, :] * stride_w_n)
     # compute output
     acc = tl.zeros((BLOCK_M, BLOCK_N), dtype=tl.float32)
     for k in range(K, BLOCK_K * pid_k, -(BLOCK_K * SPLIT_K)):

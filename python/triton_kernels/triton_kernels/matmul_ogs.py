@@ -408,8 +408,8 @@ def matmul_ogs(x, w, bias,
     w_scale = precision_config.weight_scale
     w_has_mx = w_scale is not None
     is_hopper_fp8 = is_cuda() and not target_info.cuda_capability_geq(10, 0) and bitwidth(w.dtype) == 8
-    # if w_has_mx: assert w.stride(-2) == 1, "`w` must be column-major when it has data-type mxfp"
-    # if is_hopper_fp8: assert w.stride(-2) == 1, "`w` must be column-major when it has data-type FP8 on capability < 10"
+    if w_has_mx: assert w.stride(-2) == 1, "`w` must be column-major when it has data-type mxfp"
+    if is_hopper_fp8: assert w.stride(-2) == 1, "`w` must be column-major when it has data-type FP8 on capability < 10"
     if not isinstance(w, Tensor):
         # TODO: remove this code path; using uint8 for mxfp4 weight will bite us when we want to support uint8 for real
         dtype = FP4 if w.dtype == torch.uint8 else w.dtype
@@ -430,8 +430,7 @@ def matmul_ogs(x, w, bias,
     M = x.shape[-2] if gather_indx is None else gather_indx.src_indx.shape[0]
     batch_size = w.shape[0] if routing_data.expt_hist is None and w.ndim == 3 else 1
     K, N = w.shape[-2:]
-    W_TRANSPOSE = w.storage.data.stride()[-2] != 1
-    assert K == x.shape[-1], f"K = {K} != x.shape[-1] = {x.shape[-1]}"
+    assert K == x.shape[-1]
     if x.ndim == 3 and w.ndim == 3:
         assert x.shape[0] == w.shape[0]
     # compute optimization flags
@@ -445,7 +444,6 @@ def matmul_ogs(x, w, bias,
     opt_flags = make_opt_flags(out_dtype, x.dtype, w.dtype, precision_config,
         M, N, K, routing_data, can_use_tma, can_use_fused_scatter, epilogue.effective_itemsize,
     )
-    print(f"[opt_flags]|{opt_flags}")
     if w_scale is not None and opt_flags.is_persistent and not target_info.has_native_mxfp():
         raise NotImplementedError("Must use non-persistent kernel for simulated MXFP")
     if w_scale is not None and w_scale.storage.layout.name is not None and not opt_flags.is_persistent and target_info.has_native_mxfp():
@@ -530,7 +528,6 @@ def matmul_ogs(x, w, bias,
     out_scale_strides = (0, ) * (3 - len(out_scale_strides)) + out_scale_strides
     # launch kernel
     kernels = get_kernels(epilogue.specs, fused_activation.specs)
-    print("w_storage.data.stride()", w_storage.data.stride())
     (kernels._p_matmul_ogs if opt_flags.is_persistent else kernels._matmul_ogs)[(grid,)](
                    flex.out_data.reinterpret(memory["output"]),
                    flex.out_data.reinterpret(out0), *out0.stride(),
@@ -539,8 +536,7 @@ def matmul_ogs(x, w, bias,
                    x_tensor_or_tma, x_storage.data, *x_strides,
                    flex.lhs_data.scale,
                    None if x_scale is None else x_scale.data.view(torch.uint8), *x_scale_strides,
-                   w_tensor_or_tma, *w_storage.data.stride(),
-                   W_TRANSPOSE,
+                   w_tensor_or_tma, *w_storage.data.stride(), w_storage.data.stride()[-1] != 1,
                    flex.rhs_data.scale,
                    w_scale_tensor_or_tma, *w_scale_strides,
                    bias, bias_stride,
