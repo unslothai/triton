@@ -89,7 +89,6 @@ class RoutingData:
 # sort tokens by expert
 # --------------------------
 
-def 
 
 class SortTokens(torch.autograd.Function):
 
