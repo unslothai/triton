@@ -24,19 +24,23 @@ def topk_forward(x, k, apply_softmax=True, dim=1, return_bitmatrix=True, y_indx=
     # scratchpad tensors
     # NOTE: these are not returned
     y_vals = torch.empty((n_rows_max, k), dtype=x.dtype, device=dev)
+    print(f"[y_vals]|{y_vals.shape}")
     if y_indx is not None:
         use_provided_indx = True
     else:
         y_indx = torch.empty((n_rows_max, k), dtype=torch.int16, device=dev)
+        print(f"[y_indx]|{y_indx.shape}")
         use_provided_indx = False
     # create bitmatrix in transposed memory layout:
     n_cols_pad = cdiv(n_cols, BLOCK_N) * BLOCK_N
     n_cols_words = n_cols_pad // 32
     bitmatrix = torch.empty((n_cols_words, cdiv(n_rows_max, 32) * 32), dtype=torch.uint32, device=dev)
+    print(f"[bitmatrix]|{bitmatrix.shape}")
     bitmatrix = torch.transpose(bitmatrix, 0, 1)[:n_rows_max]
     s_blocks = cdiv(n_cols, BLOCK_S)
     s_cols = s_blocks * BLOCK_S
     scratchpad = torch.empty((s_cols, ), dtype=torch.int32, device=dev)
+    print(f"[scratchpad]|{scratchpad.shape}")
     pids = max(cdiv(n_rows_max, BLOCK_M), s_blocks)
     _topk_forward[(pids, )](
         x, x.stride(0),  # inputs

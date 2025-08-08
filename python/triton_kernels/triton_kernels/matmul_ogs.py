@@ -444,6 +444,7 @@ def matmul_ogs(x, w, bias,
     opt_flags = make_opt_flags(out_dtype, x.dtype, w.dtype, precision_config,
         M, N, K, routing_data, can_use_tma, can_use_fused_scatter, epilogue.effective_itemsize,
     )
+    print(f"[opt_flags]|{opt_flags}")
     if w_scale is not None and opt_flags.is_persistent and not target_info.has_native_mxfp():
         raise NotImplementedError("Must use non-persistent kernel for simulated MXFP")
     if w_scale is not None and w_scale.storage.layout.name is not None and not opt_flags.is_persistent and target_info.has_native_mxfp():
