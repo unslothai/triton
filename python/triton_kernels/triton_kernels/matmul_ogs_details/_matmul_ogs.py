@@ -261,7 +261,7 @@ def _matmul_ogs(
             if is_x_microscaled:
                 mask_x_k_scale = offs_x_k_scale * MX_PACK_DIVISOR < k
 
-        x = tl.load(XPtrs, mask=mask_k[None, :], other=0.0).to(tl.bfloat16)
+        x = tl.load(XPtrs, mask=mask_k[None, :], other=0.0)
         w = tl.load(WPtrs, mask=mask_k_w[:, None], other=0.0, cache_modifier=W_CACHE_MODIFIER)
         if is_w_microscaled:
             x_format: tl.constexpr = get_scaled_dot_format_string(x.dtype)
@@ -296,7 +296,6 @@ def _matmul_ogs(
                 acc = tl.dot(w, x, acc, max_num_imprecise_acc=MAX_NUM_IMPRECISE_ACC, allow_tf32=ALLOW_TF32)
                 acc = acc.trans()
             else:
-                tl.static_print(f"[tl.dot_scaled]|x_format={x_format}|w_format={w_format}")
                 acc = tl.dot_scaled(x, x_scales, x_format, w, w_scales, w_format, acc=acc, fast_math=True)
             if SWIZZLE_MX_SCALE == "BLACKWELL_SCALE":
                 WMxScalePtrs += (MX_SCALE_BLOCK_K // 4 * SPLIT_K) * stride_w_mx_k

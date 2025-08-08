@@ -529,6 +529,7 @@ def matmul_ogs(x, w, bias,
     out_scale_strides = (0, ) * (3 - len(out_scale_strides)) + out_scale_strides
     # launch kernel
     kernels = get_kernels(epilogue.specs, fused_activation.specs)
+    print("w_storage.data.stride()", w_storage.data.stride())
     (kernels._p_matmul_ogs if opt_flags.is_persistent else kernels._matmul_ogs)[(grid,)](
                    flex.out_data.reinterpret(memory["output"]),
                    flex.out_data.reinterpret(out0), *out0.stride(),
