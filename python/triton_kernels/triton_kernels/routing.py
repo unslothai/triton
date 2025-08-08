@@ -109,7 +109,6 @@ class SortTokens(torch.autograd.Function):
         hist = hist[:n_expts_tot]
         assert hist.dtype == torch.int32
         # scratchpad
-        print(f"[n_gates_pad]|{n_gates_pad}")
         expt_offs = torch.empty(n_expts_tot, dtype=torch.int32, device=device)
         combined_indx = torch.empty(n_gates_pad * 2, dtype=torch.int32, device=device)
         # output
@@ -297,7 +296,6 @@ def routing(logits, n_expts_act, sm_first=False, expt_indx=None, simulated_ep=1,
     expt_scal, expt_indx, bitmatrix = topk(logits, n_expts_act,  #
                                            apply_softmax=not sm_first, y_indx=expt_indx, n_rows=n_rows)
     n_expts_tot = logits.shape[-1] // simulated_ep
-    print(f"[n_expts_tot]|{n_expts_tot}")
     # mutate bitmatrix
     if simulated_ep > 1:
         expt_scal, expt_indx, bitmatrix = prune_routing(expt_scal, expt_indx, bitmatrix, logits.shape[-1], simulated_ep)
