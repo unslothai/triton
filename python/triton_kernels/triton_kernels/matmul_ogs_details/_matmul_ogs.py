@@ -261,7 +261,7 @@ def _matmul_ogs(
             if is_x_microscaled:
                 mask_x_k_scale = offs_x_k_scale * MX_PACK_DIVISOR < k
 
-        x = tl.load(XPtrs, mask=mask_k[None, :], other=0.0)
+        x = tl.load(XPtrs, mask=mask_k[None, :], other=0.0).to(tl.bfloat16)
         w = tl.load(WPtrs, mask=mask_k_w[:, None], other=0.0, cache_modifier=W_CACHE_MODIFIER)
         if is_w_microscaled:
             x_format: tl.constexpr = get_scaled_dot_format_string(x.dtype)
