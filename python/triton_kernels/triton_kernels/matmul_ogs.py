@@ -430,6 +430,7 @@ def matmul_ogs(x, w, bias,
     M = x.shape[-2] if gather_indx is None else gather_indx.src_indx.shape[0]
     batch_size = w.shape[0] if routing_data.expt_hist is None and w.ndim == 3 else 1
     K, N = w.shape[-2:]
+    print(w.shape, x.shape)
     assert K == x.shape[-1]
     if x.ndim == 3 and w.ndim == 3:
         assert x.shape[0] == w.shape[0]
