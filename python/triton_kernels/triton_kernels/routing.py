@@ -89,6 +89,7 @@ class RoutingData:
 # sort tokens by expert
 # --------------------------
 
+def 
 
 class SortTokens(torch.autograd.Function):
 
@@ -296,6 +297,7 @@ def routing(logits, n_expts_act, sm_first=False, expt_indx=None, simulated_ep=1,
     expt_scal, expt_indx, bitmatrix = topk(logits, n_expts_act,  #
                                            apply_softmax=not sm_first, y_indx=expt_indx, n_rows=n_rows)
     n_expts_tot = logits.shape[-1] // simulated_ep
+    print(f"[n_expts_tot]|{n_expts_tot}")
     # mutate bitmatrix
     if simulated_ep > 1:
         expt_scal, expt_indx, bitmatrix = prune_routing(expt_scal, expt_indx, bitmatrix, logits.shape[-1], simulated_ep)
