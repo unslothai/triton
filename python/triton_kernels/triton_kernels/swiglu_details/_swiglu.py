@@ -61,6 +61,7 @@ def _swiglu(Out, OutExpectedScale, OutActualScale, OutChecksumScale, A, AScale, 
         M_BLOCKS = (M + BLOCK_M - 1) // BLOCK_M
 
     local_max = tl.full([tl.extra.cuda.num_threads()], 0.0, tl.float32)
+    tl.static_print(f"limit={limit}")
 
     a_scale = load_scale(AScale)
     out_expected_scale = load_scale(OutExpectedScale)
