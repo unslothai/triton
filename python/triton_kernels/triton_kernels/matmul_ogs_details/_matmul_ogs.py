@@ -296,7 +296,7 @@ def _matmul_ogs(
                 acc = tl.dot(w, x, acc, max_num_imprecise_acc=MAX_NUM_IMPRECISE_ACC, allow_tf32=ALLOW_TF32)
                 acc = acc.trans()
             else:
-                tl.static_print(f"x_format={x_format}\nw_format={w_format}")
+                tl.static_print(f"[tl.dot_scaled]|x_format={x_format}|w_format={w_format}")
                 acc = tl.dot_scaled(x, x_scales, x_format, w, w_scales, w_format, acc=acc, fast_math=True)
             if SWIZZLE_MX_SCALE == "BLACKWELL_SCALE":
                 WMxScalePtrs += (MX_SCALE_BLOCK_K // 4 * SPLIT_K) * stride_w_mx_k
@@ -316,7 +316,7 @@ def _matmul_ogs(
     if B is not None:
         BPtrs = B + expt_id * stride_b_e + offs_y_n
         if pid_k == 0:
-            bias = tl.load(BPtrs, mask=mask_n, other=0).to(tl.float32)
+            bias = tl.load(BPtrs, mask=mask_n, other=0)
         else:
             bias = tl.full([BLOCK_N], 0, dtype=tl.float32)
     else:
