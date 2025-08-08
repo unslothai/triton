@@ -109,6 +109,7 @@ class SortTokens(torch.autograd.Function):
         hist = hist[:n_expts_tot]
         assert hist.dtype == torch.int32
         # scratchpad
+        print(f"[n_gates_pad]|{n_gates_pad}")
         expt_offs = torch.empty(n_expts_tot, dtype=torch.int32, device=device)
         combined_indx = torch.empty(n_gates_pad * 2, dtype=torch.int32, device=device)
         # output
