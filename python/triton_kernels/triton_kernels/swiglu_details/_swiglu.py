@@ -37,7 +37,6 @@ def swiglu_launch_metadata(grid, kernel, args):
 @triton.jit
 def compute_swiglu(gelu, linear, scale, alpha, limit):
     gelu = gelu.to(tl.float32) * scale
-    tl.static_print(f"limit={limit}")
     if limit is not None:
         gelu = clip(gelu, limit, clip_lower=False)
     linear = linear.to(tl.float32) * scale
