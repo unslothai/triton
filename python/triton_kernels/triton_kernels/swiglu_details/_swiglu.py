@@ -37,6 +37,7 @@ def swiglu_launch_metadata(grid, kernel, args):
 @triton.jit
 def compute_swiglu(gelu, linear, scale, alpha, limit):
     gelu = gelu.to(tl.float32) * scale
+    tl.static_print(f"limit={limit}")
     if limit is not None:
         gelu = clip(gelu, limit, clip_lower=False)
     linear = linear.to(tl.float32) * scale
@@ -61,7 +62,6 @@ def _swiglu(Out, OutExpectedScale, OutActualScale, OutChecksumScale, A, AScale, 
         M_BLOCKS = (M + BLOCK_M - 1) // BLOCK_M
 
     local_max = tl.full([tl.extra.cuda.num_threads()], 0.0, tl.float32)
-    tl.static_print(f"limit={limit}")
 
     a_scale = load_scale(AScale)
     out_expected_scale = load_scale(OutExpectedScale)
